@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Calculator } from "../calculator";
+import './CalculatorUI.css'; 
 
 export default function CalculatorUI() {
   const [calculator] = useState(new Calculator());
@@ -7,41 +8,85 @@ export default function CalculatorUI() {
   const [result, setResult] = useState<number | null>(null);
   const [history, setHistory] = useState(calculator.getHistory());
 
-  const handleCalculate = (operation: "add" | "subtract" | "multiply") => {
-    const [a, b] = input.split(" ").map(Number);
-    if (isNaN(a) || isNaN(b)) return;
+  const handleCalculate = () => {
+    try {
+      
+      const res = eval(input.replace(",", "."));
+      setResult(res);
+      calculator.add(res, 0); 
+      setHistory([...calculator.getHistory()]);
+      setInput(""); 
+    } catch (error) {
+      console.error("Erreur dans le calcul:", error);
+      setResult(null);
+    }
+  };
 
-    let res;
-    if (operation === "add") res = calculator.add(a, b);
-    if (operation === "subtract") res = calculator.subtract(a, b);
-    if (operation === "multiply") res = calculator.multiply(a, b);
+  const handleClear = () => {
+    setInput("");
+    setResult(null);
+  };
 
-    setResult(res!);
-    setHistory([...calculator.getHistory()]);
+  const handleInput = (value: string) => {
+    setInput((prev) => prev + value);
+  };
+
+  const handleRecall = (index: number) => {
+    try {
+      const previousCalculation = calculator.getPreviousCalculation(index);
+      setInput(previousCalculation.operands.join(` ${previousCalculation.operation} `));
+      setResult(previousCalculation.res);
+    } catch (error) {
+      console.error("Erreur lors de la récupération du calcul précédent:", error);
+      alert("Impossible de récupérer le calcul précédent.");
+    }
+  };
+
+  const handleClearHistory = () => {
+    calculator.clearHistory();
+    setHistory(calculator.getHistory());
   };
 
   return (
-    <div className="p-6 max-w-md mx-auto bg-white rounded-xl shadow-md space-y-4">
-      <h1 className="text-xl font-bold">Calculatrice</h1>
-      <input
-        type="text"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder="Entrez deux nombres (ex: 5 3)"
-        className="border p-2 w-full"
-      />
-      <div className="flex space-x-2">
-        <button className="p-2 bg-blue-500 text-white rounded" onClick={() => handleCalculate("add")}>+</button>
-        <button className="p-2 bg-green-500 text-white rounded" onClick={() => handleCalculate("subtract")}>-</button>
-        <button className="p-2 bg-red-500 text-white rounded" onClick={() => handleCalculate("multiply")}>*</button>
+    <div className="calculator-container">
+      <div className="history">
+        <h2>Historique</h2>
+        <ul>
+          {history.map((entry, index) => (
+            <li key={index} onClick={() => handleRecall(index)}>
+              {entry.operands.join(` ${entry.operation} `)} = {entry.res}
+            </li>
+          ))}
+        </ul>
+        <button onClick={handleClearHistory}>Effacer</button>
       </div>
-      {result !== null && <p>Résultat : {result}</p>}
-      <h2 className="text-lg font-semibold">Historique</h2>
-      <ul>
-        {history.map((entry, index) => (
-          <li key={index}>{entry.operands.join(` ${entry.operation} `)} = {entry.res}</li>
-        ))}
-      </ul>
+      <div className="calculator">
+        <div className="calculator-display">
+          <p className="input-display">{input}</p>
+          <p className="result-display">{result !== null ? result : ""}</p>
+        </div>
+        <div className="grid">
+          {["7", "8", "9", "*"].map((value) => (
+            <button key={value} className="button number" onClick={() => handleInput(value)}>
+              {value}
+            </button>
+          ))}
+          {["4", "5", "6", "-"].map((value) => (
+            <button key={value} className="button number" onClick={() => handleInput(value)}>
+              {value}
+            </button>
+          ))}
+          {["1", "2", "3", "+"].map((value) => (
+            <button key={value} className="button number" onClick={() => handleInput(value)}>
+              {value}
+            </button>
+          ))}
+          <button className="button ac" onClick={handleClear}>AC</button>
+          <button className="button number" onClick={() => handleInput("0")}>0</button>
+          <button className="button number" onClick={() => handleInput(",")}>,</button>
+          <button className="button equal" onClick={handleCalculate}>=</button>
+        </div>
+      </div>
     </div>
   );
 }

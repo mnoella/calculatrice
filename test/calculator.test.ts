@@ -24,9 +24,9 @@ describe("Calculator", () => {
         calculator.subtract(6,3);
         calculator.multiply(3,3);
         expect (calculator.getHistory()).toEqual([
-            {operation: "add", operands: [2,2], res: 4},
-            {operation: "subtract", operands: [6,3], res: 3},
-            {operation: "multiply", operands: [3,3], res: 9},
+            {operation: "+", operands: [2,2], res: 4},
+            {operation: "-", operands: [6,3], res: 3},
+            {operation: "*", operands: [3,3], res: 9},
         ]);
     });
 

@@ -3,19 +3,19 @@ export class Calculator {
 
     add(a: number, b: number): number {
         const res = a + b;
-        this.history.push({ operation: "add", operands: [a,b], res });
+        this.history.push({ operation: "+", operands: [a,b], res });
         return res;
     }
 
     subtract(a: number, b: number): number {
         const res = a - b;
-        this.history.push({ operation: "subtract", operands: [a,b], res });
+        this.history.push({ operation: "-", operands: [a,b], res });
         return res;
     }
 
     multiply(a: number, b: number): number {
         const res = a * b;
-        this.history.push({ operation: "multiply", operands: [a,b], res });
+        this.history.push({ operation: "*", operands: [a,b], res });
         return res;
     }
 
@@ -26,4 +26,12 @@ export class Calculator {
     clearHistory(){
         this.history = [];
     }
+
+    getPreviousCalculation(index: number) {
+        if (index < 0 || index >= this.history.length) {
+            throw new Error("Index hors limites");
+        }
+        return this.history[index];
+    }
+    
 }
