@@ -10,10 +10,32 @@ export default function CalculatorUI() {
 
   const handleCalculate = () => {
     try {
-      
-      const res = eval(input.replace(",", "."));
+      const sanitizedInput = input.replace(/,/g, ".");
+  
+      const res = new Function("return " + sanitizedInput)();
       setResult(res);
-      calculator.add(res, 0); 
+  
+      const match = sanitizedInput.match(/(-?\d+(\.\d+)?)\s*([\+\-\*])\s*(-?\d+(\.\d+)?)/);
+      if (match) {
+        const [, operand1, , operation, operand2] = match;
+  
+        const num1 = parseFloat(operand1);
+        const num2 = parseFloat(operand2);
+  
+        switch (operation) {
+          case "+":
+            calculator.add(num1, num2);
+            break;
+          case "-":
+            calculator.subtract(num1, num2);
+            break;
+          case "*":
+            calculator.multiply(num1, num2);
+            break;
+        }
+      } 
+  
+      //Historique
       setHistory([...calculator.getHistory()]);
       setInput(""); 
     } catch (error) {
@@ -21,6 +43,7 @@ export default function CalculatorUI() {
       setResult(null);
     }
   };
+  
 
   const handleClear = () => {
     setInput("");
@@ -33,14 +56,15 @@ export default function CalculatorUI() {
 
   const handleRecall = (index: number) => {
     try {
-      const previousCalculation = calculator.getPreviousCalculation(index);
-      setInput(previousCalculation.operands.join(` ${previousCalculation.operation} `));
-      setResult(previousCalculation.res);
+        const previousCalculation = calculator.getPreviousCalculation(index);
+        setInput(previousCalculation.res.toString()); // Lors de la recuperation d'une opération dans l'historique le dernier résultat est comme nouvelle entrée
+        setResult(previousCalculation.res);
     } catch (error) {
-      console.error("Erreur lors de la récupération du calcul précédent:", error);
-      alert("Impossible de récupérer le calcul précédent.");
+        console.error("Erreur lors de la récupération du calcul précédent:", error);
+        alert("Impossible de récupérer le calcul précédent.");
     }
   };
+
 
   const handleClearHistory = () => {
     calculator.clearHistory();
